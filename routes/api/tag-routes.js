@@ -1,28 +1,95 @@
 const router = require('express').Router();
+const sequelize = require('sequelize');
 const { Tag, Product, ProductTag } = require('../../models');
 
 // The `/api/tags` endpoint
 
-router.get('/', (req, res) => {
-  // find all tags
-  // be sure to include its associated Product data
+// finds all Tags
+router.get('/', async (req, res) => {
+  try {
+    const tagsData = await Tag.findAll({
+      include: [{ model: Product}, {model: ProductTag}],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              ''
+            ),
+            ''
+          ],
+        ],
+      }
+    });
+    res.status(200).json(tagsData)
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
-router.get('/:id', (req, res) => {
-  // find a single tag by its `id`
-  // be sure to include its associated Product data
+// finds one tag
+router.get('/:id', async (req, res) => {
+  try {
+    const tagsData = await Tag.findbyPK(req.params.id, {
+      include: [{ model: Product}, {model: ProductTag}],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              ''
+            ),
+            ''
+          ],
+        ],
+      },
+    });
+
+    res.status(200).json(tagsData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
-router.post('/', (req, res) => {
-  // create a new tag
+// create a new tag
+router.post('/', async (req, res) => {
+  try {
+    const dbTagData = await Tag.create({
+      
+    }); res.status(200).json(dbTagData);
+  } catch {
+    console.error(err);
+    res.status(500).json({ message: 'Could not create tag'});
+  }
 });
 
-router.put('/:id', (req, res) => {
-  // update a tag's name by its `id` value
+// update a tag's name by its `id` value
+router.put('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const tagsData = await Tag.update(req.body, {
+      where: {id},
+      returning: true,
+    });
+    if (!Tag) {
+      res.status(404).json({ message: 'Tag not found'});
+    } else {
+      res.json(tagsData);
+    }
+  } catch (err) {
+res.status(500).json({ message: 'Could not update tag'})
+  }
 });
 
-router.delete('/:id', (req, res) => {
-  // delete on tag by its `id` value
+// delete on tag by its `id` value
+router.delete('/:id', async (req, res) => {
+  try {
+const id = req.params.id;
+await Tag.destroy({
+  where: { id },
+});
+res.json({ message: 'Tag deleted'});
+  } catch (err) {
+res.status(500).json({ message: 'Could not delete tag'})
+  }
 });
 
 module.exports = router;
