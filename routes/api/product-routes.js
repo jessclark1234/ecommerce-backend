@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
 });
 
 // get one product
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find a single product by its `id`
   try {
     const productData = await Product.findByPk(req.params.id, {
@@ -36,11 +36,18 @@ router.get('/:id', (req, res) => {
       attributes: {
         include: [
           [
-            
+            sequelize.literal()
           ]
         ]
       }
-      })
+    });
+    if (!productData) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+    res.status(200).json(productData);
+  } catch (err) {
+    res.status(500).json(err);
   }
 
 
@@ -122,8 +129,16 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Product.destroy({
+      where: { id },
+    });
+    res.json({ message: 'Product has been deleted'});
+  } catch (err) {
+    res.status(500).json({ message: 'Could not delete product', error: err})
+  }
 });
 
 module.exports = router;
