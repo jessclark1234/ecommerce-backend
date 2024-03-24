@@ -9,16 +9,6 @@ router.get('/', async (req, res) => {
   try {
     const categoriesData = await Category.findAll({
       include: [{ model: Product }, { model: ProductTag }],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              'SELECT SUM'
-            ),
-            '',
-          ],
-        ],
-      }
     });
     res.status(200).json(categoriesData)
   } catch (err) {
@@ -31,16 +21,6 @@ router.get('/:id', async (req, res) => {
   try {
     const categoriesData = await Category.findbyPk(req.params.id, {
       include: [{ model: Product }, { model: ProductTag }],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              'SELECT SUM'
-            ),
-            ''
-          ],
-        ],
-      },
     });
 
     if (!categoriesData) {
